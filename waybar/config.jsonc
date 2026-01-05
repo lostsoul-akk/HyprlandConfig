@@ -1,0 +1,61 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 34,
+    "spacing": 4, 
+    "modules-left": ["cpu", "memory", "clock", "temperature"],
+    "modules-center": ["hyprland/workspaces", "hyprland/window"],
+    "modules-right": ["pulseaudio", "network", "battery", "custom/power"],
+
+    // Modules Configuration
+    "hyprland/workspaces": {
+        "show-only-active": true,
+        "format": "{id}",
+        "on-click": "activate"
+    },
+
+    "hyprland/window": {
+        "format": " |   	{class}",
+        "separate-outputs": true,
+	"rewrite": {
+		"": "Desktop" // Show this when no window is focused
+	}
+    },
+    "cpu": {
+        "format": " {usage}%",
+        "tooltip": false
+    },
+    "memory": {
+        "format": " {}%"
+    },
+    "clock": {
+        "format": " {:%H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+    "temperature": {
+        "critical-threshold": 80,
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": ["", "", ""]
+    },
+    "network": {
+        "format-wifi": " {essid}",
+        "format-disconnected": "Disconnected ⚠",
+        "tooltip-format": "{ifname} via {gwaddr} "
+    },
+    "battery": {
+        "states": { "warning": 30, "critical": 15 },
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "",
+        "format-icons": { "default": ["", "", ""] },
+        "on-click": "pavucontrol"
+    },
+    "custom/power": {
+        "format": "⏻",
+        "on-click": "wlogout", // Ensure wlogout is installed or change to 'shutdown now'
+        "tooltip": false
+    }
+}

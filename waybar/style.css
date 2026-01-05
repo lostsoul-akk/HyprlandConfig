@@ -1,0 +1,47 @@
+* {
+font-family: "JetBrainsMono Nerd Font", Roboto, Helvetica, Arial, sans-serif;
+font-size: 13px;
+border: none;
+border-radius: 0;
+}
+
+window#waybar {
+    background-color: rgba(26, 27, 38, 0.8); /* Semi-transparent dark */
+    color: #ffffff;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+/* Grouping modules into pills */
+#cpu, #memory, #clock, #temperature,
+#workspaces, #window,
+#pulseaudio, #network, #battery, #custom-power {
+padding: 0 10px;
+margin: 4px 2px;
+background-color: rgba(255, 255, 255, 0.1);
+border-radius: 8px;
+}
+
+#workspaces button {
+padding: 0 5px;
+color: #ffffff;
+background-color: #33ccff;
+margin: 4px 0px 4px 4px;
+padding: 0 10px;
+border-radius: 8px 0 0 8px;
+font-weight: bold;
+}
+
+/* #workspaces button.active {
+color: #33ccff;
+border-bottom: 2px solid #33ccff;
+} */
+
+#window {
+background-color: transparent; /* Makes the app name blend with workspaces */
+}
+
+#custom-power {
+color: #ff5555; /* Red shutdown button */
+font-size: 16px;
+}
