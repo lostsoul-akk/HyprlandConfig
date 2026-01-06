@@ -15,7 +15,7 @@
     },
 
     "hyprland/window": {
-        "format": " |   	{class}",
+        "format": " |   {class}",
         "separate-outputs": true,
 	"rewrite": {
 		"": "Desktop" // Show this when no window is focused
@@ -45,6 +45,7 @@
     "battery": {
         "states": { "warning": 30, "critical": 15 },
         "format": "{icon} {capacity}%",
+        "format-charging": "󱐋 {capacity}%", // This icon shows only when plugged in
         "format-icons": ["", "", "", "", ""]
     },
     "pulseaudio": {

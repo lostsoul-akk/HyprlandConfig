@@ -13,8 +13,7 @@ window#waybar {
 }
 
 /* Grouping modules into pills */
-#cpu, #memory, #clock, #temperature,
-#workspaces, #window,
+#cpu, #memory, #clock, #temperature, #window, #workspaces
 #pulseaudio, #network, #battery, #custom-power {
 padding: 0 10px;
 margin: 4px 2px;
@@ -25,17 +24,23 @@ border-radius: 8px;
 #workspaces button {
 padding: 0 5px;
 color: #ffffff;
-background-color: #33ccff;
-margin: 4px 0px 4px 4px;
+/* background-color: #33ccff; */
+margin: 4px 0.5px 4px 0.5px;
 padding: 0 10px;
 border-radius: 8px 0 0 8px;
 font-weight: bold;
 }
 
-/* #workspaces button.active {
+#workspaces button.active {
 color: #33ccff;
 border-bottom: 2px solid #33ccff;
-} */
+}
+
+#workspaces button:hover {
+    background-color: #33ccff; /* The blue color you used for active */
+    color: #000000;            /* Black text */
+    transition: all 0.2s ease; /* Optional: makes the color change smooth */
+}
 
 #window {
 background-color: transparent; /* Makes the app name blend with workspaces */
