@@ -2,69 +2,104 @@
     "layer": "top",
     "position": "top",
     "height": 34,
-    "spacing": 4, 
-    "modules-left": ["cpu", "memory", "clock", "temperature"],
-    "modules-center": ["hyprland/workspaces", "hyprland/window"],
-    "modules-right": ["pulseaudio", "backlight", "network", "battery", "custom/power"],
+    "margin-top": 8,
+    "margin-left": 10,
+    "margin-right": 10,
+    "spacing": 4,
 
-    // Modules Configuration
+    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": ["network", "cpu", "memory", "pulseaudio", "battery", "custom/notification", "tray"],
+
     "hyprland/workspaces": {
-        "show-only-active": true,
-        "format": "{id}",
-        "on-click": "activate"
+        "format": "{name}",
+        "on-click": "activate",
+        "sort-by-number": true
     },
 
     "hyprland/window": {
-        "format": " |   {class}",
-        "separate-outputs": true,
-	"rewrite": {
-		"": "Desktop" // Show this when no window is focused
-	}
+        "format": "{}",
+        "max-length": 60,
+        "separate-outputs": true
     },
-    "cpu": {
-	    "format": "⚙️ {usage}%", // Microchip icon
-	    "tooltip": true
-    },
-    "memory": {
-        "format": "🧠 {}%",
-	"tooltip": true
-    },
+
     "clock": {
-        "format": "🕓 {:%H:%M}",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+        "format": "󱑂  {:%H:%M   %a %d %b}",
+        "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+        "today-format": "<b><u>{}</u></b>",
+        "actions": {
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        }
     },
-    "temperature": {
-        "critical-threshold": 80,
-        "format": "{icon} {temperatureC}°C",
-        // "format-icons": ["", "", ""]
-	"format-icons": ["🌡️"]
-    },
+
     "network": {
-        "format-wifi": "󰖩  {essid}",
-        "format-disconnected": "Disconnected 󰂭",
-        "tooltip-format": "{ifname} via {gwaddr} "
+        "format-wifi": "󰤨  {essid}",
+        "format-ethernet": "󰈀  {ipaddr}",
+        "format-disconnected": "󰤭  Disconnected",
+        "tooltip-format-wifi": "󰤨  {signalStrength}%  |  {ipaddr}",
+        "tooltip-format-ethernet": "󰈀  {ifname}  |  {ipaddr}",
+        "on-click": "nm-connection-editor"
     },
-    "battery": {
-        "states": { "warning": 20, "critical": 12 },
-        "format": "{icon} {capacity}%",
-        "format-charging": "󱐋 {capacity}%", // This icon shows only when plugged in
-        "format-icons": ["", "", "", "", ""]
+
+    "cpu": {
+        "format": "  {usage}%",
+        "interval": 2,
+        "tooltip": true
     },
+
+    "memory": {
+        "format": "󰍛  {percentage}%",
+        "tooltip-format": "{used:0.1f} GiB used / {total:0.1f} GiB total"
+    },
+
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": "🔇",
-        "format-icons": { "default": ["🔈", "🔉", "🔊"] },
-	"format-time": "{H} h {M}",
+        "format": "{icon}  {volume}%",
+        "format-muted": "󰖁  Muted",
+        "format-icons": {
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "scroll-step": 5,
         "on-click": "pavucontrol"
     },
-    "backlight": {
-	    "format": "{icon} {percent}",
-	    "format-icons": ["🌑", "🌘", "🌗", "🌖", "🌕"],
-	    "tooltip": false // TODO: Set the tooltip later on
+
+    "battery": {
+        "format": "{icon}  {capacity}%",
+        "format-charging": "󰂄  {capacity}%",
+        "format-plugged": "󰚥  {capacity}%",
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "tooltip-format": "{timeTo}"
     },
-    "custom/power": {
-        "format": "⏻",
-        "on-click": "wlogout", // Ensure wlogout is installed or change to 'shutdown now'
-        "tooltip": false
+
+    "custom/notification": {
+    	"tooltip": false,
+    	"format": "{icon}",
+    	"format-icons": {
+        	"notification":           "󰂚",
+        	"none":                   "󰂜",
+        	"dnd-notification":       "󰂛",
+        	"dnd-none":               "󰂛",
+        	"inhibited-notification": "󰂚",
+        	"inhibited-none":         "󰂜",
+        	"dnd-inhibited-notification": "󰂛",
+        	"dnd-inhibited-none":     "󰂛"
+    	},
+    	"return-type": "json",
+    	"exec-if": "which swaync-client",
+    	"exec": "swaync-client -swb",
+    	"on-click":       "swaync-client -t -sw",
+    	"on-click-right": "swaync-client -d -sw",
+    	"escape": true
+	},
+
+
+    "tray": {
+        "spacing": 8,
+        "icon-size": 16
     }
 }
+
