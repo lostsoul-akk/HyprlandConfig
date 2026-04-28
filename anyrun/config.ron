@@ -1,0 +1,16 @@
+Config(
+  x: Fraction(0.5),
+  y: Fraction(0.3),
+  width: Fraction(0.3),
+  height: Absolute(0),
+  hide_icons: false,
+  ignore_exclusive_zones: false,
+  layer: Overlay,
+  hide_on_clicked: true,
+  plugins: [
+    "/usr/local/lib/anyrun/plugins/libapplications.so",
+    "/usr/local/lib/anyrun/plugins/libshell.so",
+    "/usr/local/lib/anyrun/plugins/libwebsearch.so",
+    "/usr/local/lib/anyrun/plugins/libanyrun_cliphist.so"
+  ],
+)

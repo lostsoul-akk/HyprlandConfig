@@ -1,0 +1,113 @@
+@define-color accent #5599d2;
+@define-color bg-color #161616;
+@define-color fg-color #eeeeee;
+@define-color desc-color #999999;
+@define-color selected-bg rgba(85, 153, 210, 0.12);
+@define-color plugin-label-color #5599d2;
+
+window {
+  background: transparent;
+}
+
+box.main {
+  padding: 6px;
+  margin: 10px;
+  border-radius: 12px;
+  border: 1.5px solid @accent;
+  background-color: @bg-color;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(85, 153, 210, 0.08);
+}
+
+/* ── Search input ── */
+text {
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: @fg-color;
+  font-size: 15px;
+  border-bottom: 1px solid rgba(85, 153, 210, 0.25);
+  margin-bottom: 4px;
+}
+
+/* ── Results container ── */
+.matches {
+  background-color: transparent;
+  border-radius: 10px;
+  padding: 2px 0;
+}
+
+/* ── Plugin section wrapper ── */
+box.plugin {
+  margin-top: 4px;
+}
+
+box.plugin:first-child {
+  margin-top: 6px;
+}
+
+box.plugin.info {
+  min-width: 130px;
+  padding: 4px 8px;
+  border-right: 1px solid rgba(85, 153, 210, 0.18);
+}
+
+/* ── Plugin name label (left column) ── */
+label.plugin.info {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  color: @plugin-label-color;
+  opacity: 0.85;
+}
+
+/* ── Match list ── */
+list.plugin {
+  background-color: transparent;
+}
+
+/* ── Individual match row ── */
+row.match {
+  padding: 3px 6px;
+  border-radius: 6px;
+  margin: 1px 4px;
+  transition: background 0.1s ease;
+}
+
+.match {
+  background: transparent;
+}
+
+/* ── Match title ── */
+label.match {
+  color: @fg-color;
+  font-size: 13px;
+}
+
+/* ── Match description ── */
+label.match.description {
+  font-size: 10px;
+  color: @desc-color;
+  margin-top: 1px;
+}
+
+/* ── Selected match ── */
+row.match:selected,
+.match:selected {
+  background-color: @selected-bg;
+  border-left: 3px solid @accent;
+  border-radius: 0 6px 6px 0;
+  animation: fade-in 0.1s linear;
+}
+
+row.match:selected label.match {
+  color: @fg-color;
+}
+
+row.match:selected label.match.description {
+  color: #bbbbbb;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
