@@ -9,7 +9,7 @@
 
     "modules-left": ["hyprland/workspaces", "hyprland/window"],
     "modules-center": ["clock"],
-    "modules-right": ["network", "cpu", "memory", "pulseaudio", "battery", "custom/notification", "tray"],
+    "modules-right": ["network", "cpu", "memory", "pulseaudio", "custom/brightness", "custom/nightmode", "battery", "custom/notification", "tray"],
 
     "hyprland/workspaces": {
         "format": "{name}",
@@ -73,6 +73,25 @@
             "critical": 15
         },
         "tooltip-format": "{timeTo}"
+    },
+
+    "custom/brightness": {
+        "exec": "brightnessctl -m | awk -F, '{gsub(/%/,\"\",$4); p=int($4); if(p<=33) i=\"󰃞\"; else if(p<=66) i=\"󰃟\"; else i=\"󰃠\"; printf \"{\\\"text\\\":\\\"%s  %d%%\\\",\\\"tooltip\\\":\\\"Brightness: %d%%\\\"}\\n\", i, p, p}'",
+        "return-type": "json",
+        "interval": 2,
+        "on-scroll-up": "brightnessctl set +5% && pkill -RTMIN+10 waybar",
+        "on-scroll-down": "brightnessctl set 5%- && pkill -RTMIN+10 waybar",
+        "signal": 10,
+        "tooltip": true
+    },
+
+    "custom/nightmode": {
+        "exec": "pgrep -x hyprsunset > /dev/null && echo '{\"text\":\"󱩌\",\"class\":\"active\",\"tooltip\":\"Night mode ON — click to disable\"}' || echo '{\"text\":\"󰖙\",\"class\":\"\",\"tooltip\":\"Night mode OFF — click to enable\"}'",
+        "return-type": "json",
+        "interval": 3,
+        "on-click": "pgrep -x hyprsunset > /dev/null && pkill hyprsunset || hyprsunset -t 4500 &",
+        "tooltip": true,
+        "escape": true
     },
 
     "custom/notification": {
