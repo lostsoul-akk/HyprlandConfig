@@ -1,47 +1,207 @@
+/* ============================================================
+   Waybar — Glassmorphism Theme
+   Blur is handled by Hyprland (blurls = waybar in darktheme.conf)
+   ============================================================ */
+
 * {
-font-family: "JetBrainsMono Nerd Font", Roboto, Helvetica, Arial, sans-serif;
-font-size: 13px;
-border: none;
-border-radius: 0;
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 13px;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
 }
 
+/* ── Bar window ── */
 window#waybar {
-    background-color: rgba(26, 27, 38, 0.8); /* Semi-transparent dark */
-    color: #ffffff;
+    background: rgba(15, 15, 28, 0.50);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+    color: #cdd6f4;
     transition-property: background-color;
-    transition-duration: .5s;
+    transition-duration: 0.3s;
 }
 
-/* Grouping modules into pills */
-#cpu, #memory, #clock, #temperature,
-#workspaces, #window,
-#pulseaudio, #network, #battery, #custom-power {
-padding: 0 10px;
-margin: 4px 2px;
-background-color: rgba(255, 255, 255, 0.1);
-border-radius: 8px;
+/* Strip GTK button chrome globally */
+button {
+    box-shadow: none;
+    text-shadow: none;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+/* ── Shared module pill style ── */
+#workspaces,
+#clock,
+#network,
+#cpu,
+#memory,
+#pulseaudio,
+#battery,
+#tray {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    margin: 4px 2px;
+    padding: 0 14px;
+    color: #cdd6f4;
+}
+
+/* ── Window title (no pill, just faint italic) ── */
+#window {
+    color: rgba(205, 214, 244, 0.45);
+    font-style: italic;
+    padding: 0 6px;
+    margin: 4px 2px;
+}
+
+/* ── Workspaces ── */
+#workspaces {
+    padding: 0 6px;
 }
 
 #workspaces button {
-padding: 0 5px;
-color: #ffffff;
-background-color: #33ccff;
-margin: 4px 0px 4px 4px;
-padding: 0 10px;
-border-radius: 8px 0 0 8px;
-font-weight: bold;
+    padding: 0 7px;
+    color: rgba(205, 214, 244, 0.35);
+    border-radius: 7px;
+    transition: color 0.2s ease, background 0.2s ease;
 }
 
-/* #workspaces button.active {
-color: #33ccff;
-border-bottom: 2px solid #33ccff;
-} */
-
-#window {
-background-color: transparent; /* Makes the app name blend with workspaces */
+#workspaces button.active {
+    color: #89b4fa;
+    background: rgba(137, 180, 250, 0.14);
 }
 
-#custom-power {
-color: #ff5555; /* Red shutdown button */
-font-size: 16px;
+#workspaces button:hover {
+    color: #cdd6f4;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+/* ── Clock — center accent ── */
+#clock {
+    color: #89b4fa;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* ── Network ── */
+#network {
+    color: #a6e3a1;
+}
+
+#network.disconnected {
+    color: #f38ba8;
+}
+
+/* ── CPU ── */
+#cpu {
+    color: #fab387;
+}
+
+/* ── Memory ── */
+#memory {
+    color: #cba6f7;
+}
+
+/* ── Pulseaudio ── */
+#pulseaudio {
+    color: #89dceb;
+}
+
+#pulseaudio.muted {
+    color: rgba(205, 214, 244, 0.30);
+}
+
+/* ── Battery ── */
+#battery {
+    color: #a6e3a1;
+}
+
+#battery.charging {
+    color: #a6e3a1;
+}
+
+#battery.plugged {
+    color: #a6e3a1;
+}
+
+#battery.warning:not(.charging) {
+    color: #f9e2af;
+}
+
+#battery.critical:not(.charging) {
+    color: #f38ba8;
+    animation-name: blink;
+    animation-duration: 1.2s;
+    animation-timing-function: steps(1, end);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    from { color: #f38ba8; }
+    to   { color: rgba(243, 139, 168, 0.45); }
+}
+
+/* Custom notifications */
+#custom-notification {
+    color:  #cdd6f4;
+    margin: 4px 2px;
+}
+ 
+/* Bell has unread notifications */
+#custom-notification.notification {
+    color: #f9e2af;   /* amber — same as battery warning */
+}
+ 
+/* Do Not Disturb active */
+#custom-notification.dnd-none,
+#custom-notification.dnd-notification {
+    color: rgba(205, 214, 244, 0.30);
+}
+
+
+/* ── Brightness ── */
+#custom-brightness {
+    color: #f9e2af;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    margin: 4px 2px;
+    padding: 0 14px;
+}
+
+/* ── Night mode ── */
+#custom-nightmode {
+    color: rgba(205, 214, 244, 0.40);
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    margin: 4px 2px;
+    padding: 0 14px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* Night mode is on — glow warm */
+#custom-nightmode.active {
+    color: #fab387;
+    background: rgba(250, 179, 135, 0.12);
+    border-color: rgba(250, 179, 135, 0.20);
+}
+
+/* ── Tray ── */
+#tray {
+    padding: 0 10px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background: rgba(243, 139, 168, 0.15);
+    border-radius: 6px;
 }

@@ -1,0 +1,241 @@
+/* ============================================================
+   swaync — Glassmorphism Theme
+   CSS variables are grouped at the top so theming later
+   (e.g. from wallpaper colors) only requires editing :root
+   ============================================================ */
+
+:root {
+    /* ── Colors ── */
+    --bg-base:           rgba(15, 15, 28, 0.55);
+    --bg-module:         rgba(255, 255, 255, 0.055);
+    --bg-hover:          rgba(255, 255, 255, 0.09);
+    --bg-active:         rgba(137, 180, 250, 0.14);
+
+    --border-subtle:     rgba(255, 255, 255, 0.07);
+    --border-highlight:  rgba(255, 255, 255, 0.12);
+
+    --text-primary:      #cdd6f4;
+    --text-secondary:    rgba(205, 214, 244, 0.55);
+    --text-muted:        rgba(205, 214, 244, 0.30);
+
+    --accent-blue:       #89b4fa;
+    --accent-green:      #a6e3a1;
+    --accent-red:        #f38ba8;
+    --accent-yellow:     #f9e2af;
+    --accent-mauve:      #cba6f7;
+
+    /* ── Geometry ── */
+    --radius-panel:      14px;
+    --radius-card:       10px;
+    --radius-button:     8px;
+
+    /* ── Typography ── */
+    --font:              "JetBrainsMono Nerd Font", monospace;
+    --font-size:         13px;
+}
+
+/* ── Panel (the slide-in control center) ── */
+.control-center {
+    background:    var(--bg-base);
+    border:        1px solid var(--border-highlight);
+    border-radius: var(--radius-panel);
+    color:         var(--text-primary);
+    font-family:   var(--font);
+    font-size:     var(--font-size);
+    padding:       8px;
+}
+
+/* ── Header row (title + Clear All) ── */
+.widget-title {
+    font-size:   14px;
+    font-weight: 600;
+    color:       var(--accent-blue);
+    padding:     8px 4px 4px 4px;
+}
+
+.widget-title > label {
+    font-size:   14px;
+    font-weight: 600;
+    color:       var(--accent-blue);
+}
+
+.widget-title > button {
+    background:    var(--bg-module);
+    border:        1px solid var(--border-subtle);
+    border-radius: var(--radius-button);
+    color:         var(--text-secondary);
+    font-family:   var(--font);
+    font-size:     12px;
+    padding:       3px 10px;
+    transition:    background 0.2s ease, color 0.2s ease;
+}
+
+.widget-title > button:hover {
+    background: rgba(243, 139, 168, 0.15);
+    color:      var(--accent-red);
+    border-color: rgba(243, 139, 168, 0.25);
+}
+
+/* ── Do Not Disturb toggle ── */
+.widget-dnd {
+    background:    var(--bg-module);
+    border:        1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    margin:        4px 0;
+    padding:       6px 12px;
+}
+
+.widget-dnd > label {
+    color:       var(--text-primary);
+    font-size:   var(--font-size);
+    font-weight: 500;
+}
+
+.widget-dnd > switch {
+    border-radius: 12px;
+    background:    var(--bg-hover);
+    border:        1px solid var(--border-subtle);
+}
+
+.widget-dnd > switch:checked {
+    background: var(--accent-mauve);
+}
+
+.widget-dnd > switch slider {
+    background:    var(--text-primary);
+    border-radius: 10px;
+    min-width:     18px;
+    min-height:    18px;
+}
+
+/* ── Notification list ── */
+.notification-row {
+    margin:  3px 0;
+    padding: 0;
+}
+
+/* ── Individual notification card ── */
+.notification {
+    background:    var(--bg-module);
+    border:        1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    padding:       10px 12px;
+    color:         var(--text-primary);
+    font-family:   var(--font);
+    transition:    background 0.15s ease;
+}
+
+.notification:hover {
+    background:  var(--bg-hover);
+    border-color: var(--border-highlight);
+}
+
+/* urgency accents — left border stripe */
+.notification.low {
+    border-left: 3px solid var(--accent-green);
+}
+
+.notification.normal {
+    border-left: 3px solid var(--accent-blue);
+}
+
+.notification.critical {
+    border-left: 3px solid var(--accent-red);
+    background:  rgba(243, 139, 168, 0.07);
+}
+
+/* ── Notification content ── */
+.notification-default-action {
+    background:    transparent;
+    border-radius: var(--radius-card);
+    padding:       0;
+}
+
+.notification-default-action:hover {
+    background: transparent;
+}
+
+.app-name {
+    font-size:   11px;
+    font-weight: 600;
+    color:       var(--accent-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary {
+    font-size:   13px;
+    font-weight: 600;
+    color:       var(--text-primary);
+}
+
+.body {
+    font-size: 12px;
+    color:     var(--text-secondary);
+}
+
+.time {
+    font-size: 11px;
+    color:     var(--text-muted);
+}
+
+/* ── Notification icon ── */
+.notification-icon {
+    border-radius: 8px;
+    margin-right:  10px;
+}
+
+/* ── Action buttons (e.g. Reply / Mark Read) ── */
+.notification-action {
+    background:    var(--bg-module);
+    border:        1px solid var(--border-subtle);
+    border-radius: var(--radius-button);
+    color:         var(--text-secondary);
+    font-family:   var(--font);
+    font-size:     12px;
+    padding:       3px 10px;
+    margin-top:    6px;
+    transition:    background 0.2s ease, color 0.2s ease;
+}
+
+.notification-action:hover {
+    background:   var(--bg-active);
+    color:        var(--accent-blue);
+    border-color: rgba(137, 180, 250, 0.25);
+}
+
+/* ── Close button on each card ── */
+.close-button {
+    background:    transparent;
+    border:        none;
+    border-radius: 6px;
+    color:         var(--text-muted);
+    font-size:     13px;
+    padding:       2px 6px;
+    transition:    background 0.15s ease, color 0.15s ease;
+}
+
+.close-button:hover {
+    background: rgba(243, 139, 168, 0.15);
+    color:      var(--accent-red);
+}
+
+/* ── Empty state ── */
+.notifications-group-headers {
+    color:     var(--text-muted);
+    font-size: 12px;
+    padding:   4px 0;
+}
+
+/* ── Popup toast (the floating notification) ── */
+.floating-notifications {
+    background: transparent;
+}
+
+.floating-notifications > .notification-row > .notification {
+    background:    var(--bg-base);
+    border:        1px solid var(--border-highlight);
+    border-radius: var(--radius-card);
+    box-shadow:    0 4px 24px rgba(0, 0, 0, 0.4);
+    margin:        4px;
+}

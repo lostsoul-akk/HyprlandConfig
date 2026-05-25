@@ -2,60 +2,123 @@
     "layer": "top",
     "position": "top",
     "height": 34,
-    "spacing": 4, 
-    "modules-left": ["cpu", "memory", "clock", "temperature"],
-    "modules-center": ["hyprland/workspaces", "hyprland/window"],
-    "modules-right": ["pulseaudio", "network", "battery", "custom/power"],
+    "margin-top": 8,
+    "margin-left": 10,
+    "margin-right": 10,
+    "spacing": 4,
 
-    // Modules Configuration
+    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": ["network", "cpu", "memory", "pulseaudio", "custom/brightness", "custom/nightmode", "battery", "custom/notification", "tray"],
+
     "hyprland/workspaces": {
-        "show-only-active": true,
-        "format": "{id}",
-        "on-click": "activate"
+        "format": "{name}",
+        "on-click": "activate",
+        "sort-by-number": true
     },
 
     "hyprland/window": {
-        "format": " |   	{class}",
-        "separate-outputs": true,
-	"rewrite": {
-		"": "Desktop" // Show this when no window is focused
-	}
+        "format": "{}",
+        "max-length": 60,
+        "separate-outputs": true
     },
-    "cpu": {
-        "format": " {usage}%",
-        "tooltip": false
-    },
-    "memory": {
-        "format": " {}%"
-    },
+
     "clock": {
-        "format": " {:%H:%M}",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+        "format": "󱑂  {:%H:%M   %a %d %b}",
+        "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+        "today-format": "<b><u>{}</u></b>",
+        "actions": {
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        }
     },
-    "temperature": {
-        "critical-threshold": 80,
-        "format": "{icon} {temperatureC}°C",
-        "format-icons": ["", "", ""]
-    },
+
     "network": {
-        "format-wifi": " {essid}",
-        "format-disconnected": "Disconnected ⚠",
-        "tooltip-format": "{ifname} via {gwaddr} "
+        "format-wifi": "󰤨  {essid}",
+        "format-ethernet": "󰈀  {ipaddr}",
+        "format-disconnected": "󰤭  Disconnected",
+        "tooltip-format-wifi": "󰤨  {signalStrength}%  |  {ipaddr}",
+        "tooltip-format-ethernet": "󰈀  {ifname}  |  {ipaddr}",
+        "on-click": "nm-connection-editor"
     },
-    "battery": {
-        "states": { "warning": 30, "critical": 15 },
-        "format": "{icon} {capacity}%",
-        "format-icons": ["", "", "", "", ""]
+
+    "cpu": {
+        "format": "  {usage}%",
+        "interval": 2,
+        "tooltip": true
     },
+
+    "memory": {
+        "format": "󰍛  {percentage}%",
+        "tooltip-format": "{used:0.1f} GiB used / {total:0.1f} GiB total"
+    },
+
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": "",
-        "format-icons": { "default": ["", "", ""] },
+        "format": "{icon}  {volume}%",
+        "format-muted": "󰖁  Muted",
+        "format-icons": {
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "scroll-step": 5,
         "on-click": "pavucontrol"
     },
-    "custom/power": {
-        "format": "⏻",
-        "on-click": "wlogout", // Ensure wlogout is installed or change to 'shutdown now'
-        "tooltip": false
+
+    "battery": {
+        "format": "{icon}  {capacity}%",
+        "format-charging": "󰂄  {capacity}%",
+        "format-plugged": "󰚥  {capacity}%",
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "tooltip-format": "{timeTo}"
+    },
+
+    "custom/brightness": {
+        "exec": "brightnessctl -m | awk -F, '{gsub(/%/,\"\",$4); p=int($4); if(p<=33) i=\"󰃞\"; else if(p<=66) i=\"󰃟\"; else i=\"󰃠\"; printf \"{\\\"text\\\":\\\"%s  %d%%\\\",\\\"tooltip\\\":\\\"Brightness: %d%%\\\"}\\n\", i, p, p}'",
+        "return-type": "json",
+        "interval": 2,
+        "on-scroll-up": "brightnessctl set +5% && pkill -RTMIN+10 waybar",
+        "on-scroll-down": "brightnessctl set 5%- && pkill -RTMIN+10 waybar",
+        "signal": 10,
+        "tooltip": true
+    },
+
+    "custom/nightmode": {
+        "exec": "pgrep -x hyprsunset > /dev/null && echo '{\"text\":\"󱩌\",\"class\":\"active\",\"tooltip\":\"Night mode ON — click to disable\"}' || echo '{\"text\":\"󰖙\",\"class\":\"\",\"tooltip\":\"Night mode OFF — click to enable\"}'",
+        "return-type": "json",
+        "interval": 3,
+        "on-click": "pgrep -x hyprsunset > /dev/null && pkill hyprsunset || hyprsunset -t 4500 &",
+        "tooltip": true,
+        "escape": true
+    },
+
+    "custom/notification": {
+    	"tooltip": false,
+    	"format": "{icon}",
+    	"format-icons": {
+        	"notification":           "󰂚",
+        	"none":                   "󰂜",
+        	"dnd-notification":       "󰂛",
+        	"dnd-none":               "󰂛",
+        	"inhibited-notification": "󰂚",
+        	"inhibited-none":         "󰂜",
+        	"dnd-inhibited-notification": "󰂛",
+        	"dnd-inhibited-none":     "󰂛"
+    	},
+    	"return-type": "json",
+    	"exec-if": "which swaync-client",
+    	"exec": "swaync-client -swb",
+    	"on-click":       "swaync-client -t -sw",
+    	"on-click-right": "swaync-client -d -sw",
+    	"escape": true
+	},
+
+
+    "tray": {
+        "spacing": 8,
+        "icon-size": 16
     }
 }
+
