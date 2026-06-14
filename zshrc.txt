@@ -1,0 +1,127 @@
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=10000
+SAVEHIST=10000
+setopt extendedglob nomatch notify
+unsetopt beep
+bindkey -v
+# End of lines configured by zsh-newuser-install
+# The following lines were added by compinstall
+zstyle :compinstall filename '/home/kinyanzui/.zshrc'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+#
+alias start-wayland="/usr/lib/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland"
+
+# --- Dynamic Noctalia Zsh Prompt (with Separator) ---
+
+setopt PROMPT_SUBST
+
+# Enable and configure version control system info (for Git)
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git*' formats "⎇ %b"
+
+# Cache variables to ensure zero input lag
+typeset -g _noctalia_last_mod=0
+typeset -g _C_CYAN="%F{#00e5ff}"
+typeset -g _C_PURPLE="%F{#b000ff}"
+typeset -g _C_GREEN="%F{#00ff66}"
+typeset -g _C_RED="%F{#ff003c}"
+typeset -g _C_YELLOW="%F{#ffea00}"
+
+_update_prompt_colors() {
+    # Default Fallback: Sleek Neo-Corporate / Dark Neon theme
+    local default_cyan="%F{#00e5ff}"
+    local default_purple="%F{#b000ff}"
+    local default_green="%F{#00ff66}"
+    local default_red="%F{#ff003c}"
+    local default_yellow="%F{#ffea00}"
+
+    if pgrep -x "noctalia-shell" >/dev/null 2>&1; then
+        local color_file="$HOME/.config/noctalia/colors.json"
+        
+        if command -v jq >/dev/null && [[ -f "$color_file" ]]; then
+            local current_mod=$(stat -c %Y "$color_file" 2>/dev/null || echo 1)
+            
+            if [[ "$current_mod" != "$_noctalia_last_mod" ]]; then
+                _C_CYAN="%F{$(jq -r '.colors.primary.default.hex // "#00e5ff"' "$color_file")}"
+                _C_PURPLE="%F{$(jq -r '.colors.secondary.default.hex // "#b000ff"' "$color_file")}"
+                _C_GREEN="%F{$(jq -r '.colors.tertiary.default.hex // "#00ff66"' "$color_file")}"
+                _C_RED="%F{$(jq -r '.colors.error.default.hex // "#ff003c"' "$color_file")}"
+                _C_YELLOW="%F{$(jq -r '.colors.surface_tint.default.hex // "#ffea00"' "$color_file")}"
+                
+                _noctalia_last_mod=$current_mod
+            fi
+        fi
+    else
+        _C_CYAN=$default_cyan
+        _C_PURPLE=$default_purple
+        _C_GREEN=$default_green
+        _C_RED=$default_red
+        _C_YELLOW=$default_yellow
+        _noctalia_last_mod=0
+    fi
+}
+
+# Hook to run before every prompt is drawn
+precmd() {
+    vcs_info
+    _update_prompt_colors
+
+    local RESET="%f"
+    
+    # Native conditional exit status logic
+    local STATUS="%(?.${_C_GREEN}✓.${_C_RED}✗)${_C_CYAN}"
+
+    # Generate the continuous horizontal separator line
+    # (Pads an empty string up to the full $COLUMNS width using the '─' character)
+    local HR="${_C_CYAN}${(l:$COLUMNS::─:)}${RESET}"
+
+    # Left Prompt: Separator, User, Host, and Directory Path
+    PROMPT="
+${HR}
+${_C_CYAN}┌─[${_C_PURPLE}%n${_C_CYAN}@${_C_PURPLE}%m${_C_CYAN}]─[${_C_GREEN}%~${_C_CYAN}]
+${_C_CYAN}└─[${STATUS}]─❯ ${RESET}"
+
+    # Right Prompt: Git Branch (Flushed Right)
+    if [[ -n "${vcs_info_msg_0_}" ]]; then
+        RPROMPT="${_C_YELLOW}${vcs_info_msg_0_}${RESET}"
+    else
+        RPROMPT=""
+    fi
+}
+
+###############################################
+#### AUTOSUGGESTIONS & SYNTAX HIGHLIGHTING ####
+###############################################
+
+
+# --- Autosuggestions & Syntax Highlighting ---
+
+# 1. Source the plugins installed via pacman
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# 2. Configure Autosuggestions color (Faded gray)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=242"
+
+# 3. Configure Syntax Highlighting Colors
+# Note: Syntax highlighting MUST be configured AFTER sourcing the plugin above.
+
+# Valid command (Blue)
+ZSH_HIGHLIGHT_STYLES[command]='fg=blue,bold'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=blue,bold'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=blue,bold'
+
+# Invalid command (Amber / Yellow)
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=yellow'
+
+# Valid path (Green)
+ZSH_HIGHLIGHT_STYLES[path]='fg=green'
+ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=green'
+
+# Default text / Invalid paths (Faded out gray)
+ZSH_HIGHLIGHT_STYLES[default]='fg=244'
