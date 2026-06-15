@@ -135,9 +135,9 @@ hl.config({
 -- })
 
 
------------------
+----------------
 ---- MISC -------
------------------
+----------------
 
 hl.config({
     misc = {
@@ -176,4 +176,30 @@ hl.window_rule({
     match = { fullscreen = true },
 
     opacity = "1.0 override 1.0 override",
+})
+
+-- Satty: open floating and centered so it overlays your current workspace
+-- without disrupting the tiling layout. Drag it anywhere after it opens.
+-- Class regex covers both "satty" and "com.gabm.satty" app-ids.
+hl.window_rule({
+    name   = "float-satty",
+    match  = { class = "com.gabm.satty" },
+
+    float  = true,
+    center = true,
+    size = "1200 700"
+})
+
+-- Picture-in-Picture: auto-float, pin across all workspaces, and lock to
+-- a small 400×225 (16:9) size in the bottom-right corner of the screen.
+-- You can still drag it wherever you like — pin just keeps it visible
+-- on every workspace.
+hl.window_rule({
+    name  = "pip-float-pin",
+    match = { title = "^Picture-in-Picture$" },
+
+    float  = true,
+    pin    = true,
+    size   = "400 225",
+    move   = "75% 75%",
 })
