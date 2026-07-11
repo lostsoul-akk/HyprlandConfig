@@ -28,22 +28,22 @@ set -euo pipefail
 
 # ----------------------------- CONFIG --------------------------------------
 
-API_KEY="${API_KEY:-}"                     # your wallhaven API key (optional, needed for NSFW/account settings)
-QUERY="${QUERY:-nature}"                         # search query, e.g. "nature", "-people", "@username"
-CATEGORIES="${CATEGORIES:-111}"            # general/anime/people bitmask
-PURITY="${PURITY:-100}"                    # sfw/sketchy/nsfw bitmask (nsfw needs API key)
+API_KEY="${API_KEY:-$wallhaven}"           # your wallhaven API key (optional, needed for NSFW/account settings)
+QUERY="${QUERY:-}"                         # search query, e.g. "nature", "-people", "@username"
+CATEGORIES="${CATEGORIES:-100}"            # general/anime/people bitmask
+PURITY="${PURITY:-110}"                    # sfw/sketchy/nsfw bitmask (nsfw needs API key)
 SORTING="${SORTING:-date_added}"           # date_added, relevance, random, views, favorites, toplist
 ORDER="${ORDER:-desc}"                     # desc, asc
-TOPRANGE="${TOPRANGE:-1M}"                 # only used when SORTING=toplist: 1d,3d,1w,1M,3M,6M,1y
+TOPRANGE="${TOPRANGE:-1d}"                 # only used when SORTING=toplist: 1d,3d,1w,1M,3M,6M,1y
 ATLEAST="${ATLEAST:-}"                     # minimum resolution, e.g. "1920x1080"
-RESOLUTIONS="${RESOLUTIONS:-2560x1440}"             # exact resolutions, e.g. "1920x1080,2560x1440"
+RESOLUTIONS="${RESOLUTIONS:-2560x1440}"    # exact resolutions, e.g. "1920x1080,2560x1440"
 RATIOS="${RATIOS:-}"                       # aspect ratios, e.g. "16x9,16x10"
 LIMIT="${LIMIT:-20}"                       # max wallpapers to keep in OUTDIR at once
 MAX_SEARCH_PAGES="${MAX_SEARCH_PAGES:-20}" # safety cap on result pages to page through while refilling the pool
 OUTDIR="${OUTDIR:-$HOME/Pictures/Wallpapers/wallhaven}"   # where to save downloaded images (tilde-safe: uses $HOME)
 HISTORY_FILE="${HISTORY_FILE:-$OUTDIR/.history}"          # permanent record of every ID ever downloaded (never pruned)
 WHITELIST_FILE="${WHITELIST_FILE:-$OUTDIR/.whitelist}"    # one wallpaper ID per line; pinned, survives rotation, auto-restored
-RATE_LIMIT_SLEEP="${RATE_LIMIT_SLEEP:-1.4}" # seconds to sleep between API calls (45/min limit -> ~1.33s min)
+RATE_LIMIT_SLEEP="${RATE_LIMIT_SLEEP:-1.4}"               # seconds to sleep between API calls (45/min limit -> ~1.33s min)
 
 # ---------------------------- ARG PARSING -----------------------------------
 
