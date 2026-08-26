@@ -13,9 +13,37 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 #
+#
+# Aliases
 alias start-wayland="/usr/lib/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland"
+alias start-python="source .venv/bin/activate"
 
-# --- Dynamic Noctalia Zsh Prompt (with Separator) ---
+# ls: colorized, and differentiate dirs/files/links/etc.
+if command -v dircolors >/dev/null 2>&1; then
+    if [ -r ~/.dircolors ]; then
+        eval "$(dircolors -b ~/.dircolors)"
+    else
+        eval "$(dircolors -b)"
+    fi
+fi
+alias ls='ls --color=auto'
+# alias la='ls -lAh --color=auto'   # all files, incl. hidden, long+human-readable
+alias la='ls -a --color=auto'
+alias ll='ls -lh --color=auto'    # long listing, no hidden
+
+# Yazi Shell Wrapper
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+	command rm -f -- "$tmp"
+}
+
+# Environments
+export wallhaven="2TEc3IYDzjrren7DGniKy5IgqszGKyl6"
+export NGROK_AUTHTOKEN=3BzmW9vC26e0eVj0bGp9z4Sij9U_7fUMwYWu5BHUdmg5NiFJQ
+# --- Dynamic Noctalia Zsh Prompt (clean, two-line) ---
 
 setopt PROMPT_SUBST
 
@@ -42,17 +70,17 @@ _update_prompt_colors() {
 
     if pgrep -x "noctalia-shell" >/dev/null 2>&1; then
         local color_file="$HOME/.config/noctalia/colors.json"
-        
+
         if command -v jq >/dev/null && [[ -f "$color_file" ]]; then
             local current_mod=$(stat -c %Y "$color_file" 2>/dev/null || echo 1)
-            
+
             if [[ "$current_mod" != "$_noctalia_last_mod" ]]; then
                 _C_CYAN="%F{$(jq -r '.colors.primary.default.hex // "#00e5ff"' "$color_file")}"
                 _C_PURPLE="%F{$(jq -r '.colors.secondary.default.hex // "#b000ff"' "$color_file")}"
                 _C_GREEN="%F{$(jq -r '.colors.tertiary.default.hex // "#00ff66"' "$color_file")}"
                 _C_RED="%F{$(jq -r '.colors.error.default.hex // "#ff003c"' "$color_file")}"
                 _C_YELLOW="%F{$(jq -r '.colors.surface_tint.default.hex // "#ffea00"' "$color_file")}"
-                
+
                 _noctalia_last_mod=$current_mod
             fi
         fi
@@ -72,19 +100,13 @@ precmd() {
     _update_prompt_colors
 
     local RESET="%f"
-    
+
     # Native conditional exit status logic
     local STATUS="%(?.${_C_GREEN}✓.${_C_RED}✗)${_C_CYAN}"
 
-    # Generate the continuous horizontal separator line
-    # (Pads an empty string up to the full $COLUMNS width using the '─' character)
-    local HR="${_C_CYAN}${(l:$COLUMNS::─:)}${RESET}"
-
-    # Left Prompt: Separator, User, Host, and Directory Path
-    PROMPT="
-${HR}
-${_C_CYAN}┌─[${_C_PURPLE}%n${_C_CYAN}@${_C_PURPLE}%m${_C_CYAN}]─[${_C_GREEN}%~${_C_CYAN}]
-${_C_CYAN}└─[${STATUS}]─❯ ${RESET}"
+    # Clean two-line prompt: user@host path, then a compact status arrow
+    PROMPT="${_C_CYAN}╭─${_C_PURPLE}%n${_C_CYAN}@${_C_PURPLE}%m ${_C_CYAN}[${_C_GREEN}%~${_C_CYAN}]
+${_C_CYAN}╰─${STATUS}❯ ${RESET}"
 
     # Right Prompt: Git Branch (Flushed Right)
     if [[ -n "${vcs_info_msg_0_}" ]]; then
@@ -98,30 +120,49 @@ ${_C_CYAN}└─[${STATUS}]─❯ ${RESET}"
 #### AUTOSUGGESTIONS & SYNTAX HIGHLIGHTING ####
 ###############################################
 
-
 # --- Autosuggestions & Syntax Highlighting ---
 
-# 1. Source the plugins installed via pacman
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# 1. Source the plugins installed via pacman (guarded — won't error if missing)
+_AUTOSUGGEST_PLUGIN="/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+_SYNTAX_HL_PLUGIN="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-# 2. Configure Autosuggestions color (Faded gray)
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=242"
+if [[ -r "$_AUTOSUGGEST_PLUGIN" ]]; then
+    source "$_AUTOSUGGEST_PLUGIN"
+    # 2. Configure Autosuggestions color (Faded gray)
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=242"
+else
+    print -u2 "zshrc: zsh-autosuggestions not found — run: sudo pacman -S zsh-autosuggestions"
+fi
 
-# 3. Configure Syntax Highlighting Colors
-# Note: Syntax highlighting MUST be configured AFTER sourcing the plugin above.
+if [[ -r "$_SYNTAX_HL_PLUGIN" ]]; then
+    source "$_SYNTAX_HL_PLUGIN"
 
-# Valid command (Blue)
-ZSH_HIGHLIGHT_STYLES[command]='fg=blue,bold'
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=blue,bold'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=blue,bold'
+    # 3. Configure Syntax Highlighting Colors
+    # Note: only runs if the plugin above actually loaded and declared the array.
+    if (( ${+ZSH_HIGHLIGHT_STYLES} )); then
+        # Valid command (Blue)
+        ZSH_HIGHLIGHT_STYLES[command]='fg=blue,bold'
+        ZSH_HIGHLIGHT_STYLES[builtin]='fg=blue,bold'
+        ZSH_HIGHLIGHT_STYLES[alias]='fg=blue,bold'
 
-# Invalid command (Amber / Yellow)
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=yellow'
+        # Invalid command (Amber / Yellow)
+        ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=yellow'
 
-# Valid path (Green)
-ZSH_HIGHLIGHT_STYLES[path]='fg=green'
-ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=green'
+        # Valid path (Green)
+        ZSH_HIGHLIGHT_STYLES[path]='fg=green'
+        ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=green'
 
-# Default text / Invalid paths (Faded out gray)
-ZSH_HIGHLIGHT_STYLES[default]='fg=244'
+        # Default text / Invalid paths (Faded out gray)
+        ZSH_HIGHLIGHT_STYLES[default]='fg=244'
+    fi
+else
+    print -u2 "zshrc: zsh-syntax-highlighting not found — run: sudo pacman -S zsh-syntax-highlighting"
+fi
+
+unset _AUTOSUGGEST_PLUGIN _SYNTAX_HL_PLUGIN
+
+# Incase it doesn't work, you need this in your system
+# curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
