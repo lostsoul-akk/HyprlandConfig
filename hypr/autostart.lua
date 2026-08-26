@@ -14,4 +14,15 @@ hl.on("hyprland.start", function()
 
     -- Noctalia
     hl.exec_cmd("noctalia")
+
+    -- Udiskie
+    hl.exec_cmd("udiskie")
+
+    -- Custom Script
+    hl.exec_cmd("~/.local/bin/battery-notify.sh")
+
+
+    -- -- lockscreen.
+    -- hl.exec_cmd("sleep 4 && noctalia msg session lock")
 end)
+

@@ -11,7 +11,10 @@ local mainMod  = "SUPER" -- Sets "Windows" key as main modifier
 -- ── System ────────────────────────────────────────────────────────────────────
 
 hl.bind(mainMod .. " + Q",         hl.dsp.window.close())
-hl.bind(mainMod .. " + N",         hl.dsp.exit())
+
+
+-- Wouldn't wanna press this accidentally.
+--- hl.bind(mainMod .. " + N",         hl.dsp.exit())
 -- With the use of Noctalia, there's no need to have a custom waybar, hence no need for a script to restart it.
 -- Free Keybind: mainMod .. " + SHIFT + B"
 
@@ -39,9 +42,31 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(programs.menu))
 -- sudo pacman -S grim slurp satty wl-clipboard
 -- Install satty: https://github.com/gabm/satty
 
-hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(
-    [[sh -c 'FILE=$(mktemp /tmp/screenshot-XXXXXX.png) && grim -g "$(slurp)" "$FILE" && wl-copy < "$FILE" && satty --filename "$FILE" --copy-command "wl-copy"']]
-))
+-- TODO: Notice that this is for screenshots, using grim and slurp.
+-- Below  we're using Noctalia's inbuilt. Remember to switch out when you aren't using Noctalia later on in life.
+--
+-- Start an interactive region screenshot
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("noctalia msg screenshot-region"))
+
+-- Capture the focused monitor by default, pick interactively with pick, or all outputs with all
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("noctalia msg screenshot-fullscreen"))
+-- hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(
+--     [[sh -c 'FILE=$(mktemp /tmp/screenshot-XXXXXX.png) && grim -g "$(slurp)" "$FILE" && wl-copy < "$FILE" && satty --filename "$FILE" --copy-command "wl-copy"']]
+-- ))
+
+-- ── Power Profile ──────────────────────────────────────────────────────────
+hl.bind(mainMod .. " + ALT + P", function()
+    hl.exec_cmd("powerprofilesctl set performance")
+end)
+
+hl.bind(mainMod .. " + ALT + B", function()
+    hl.exec_cmd("powerprofilesctl set balanced")
+end)
+
+hl.bind(mainMod .. " + ALT + S", function()
+    hl.exec_cmd("powerprofilesctl set power-saver")
+end)
+
 
 -- ── Window management ─────────────────────────────────────────────────────────
 
@@ -49,6 +74,14 @@ hl.bind(mainMod .. " + W", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + I", hl.dsp.window.pin())
 hl.bind(mainMod .. " + Z", hl.dsp.window.pseudo())       -- dwindle pseudotile toggle
+
+-- Float + Pin in one shot - useful for PiP or any window you want
+-- to keep floating above everything else across all workspaces.
+-- SUPER + P -> make active window float and pin it.
+-- SUPER + P again -> upin and return to tiling.
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(
+	"hyprctl --batch 'dispatch togglefloating ; dispatch pin'"
+))
 
 -- Move focus — arrow keys (Commented out: Gotta master vim's key bindings).
 -- hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left"  }))
@@ -92,7 +125,7 @@ hl.bind(mainMod .. " + SHIFT + l", hl.dsp.window.move({ workspace = "e+1" }))
 hl.bind(mainMod .. " + SHIFT + h",  hl.dsp.window.move({ workspace = "e-1" }))
 
 -- Scratchpad (special workspace)
--- NOTE: moved from SHIFT+S → CTRL+S to free up SHIFT+S for screenshots
+-- NOTE: moved from SHIFT+S → CTRL+S to free up SHIFT+S for magic windows
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + SHIFT + S",  hl.dsp.window.move({ workspace = "special:magic" }))
 
@@ -118,3 +151,11 @@ hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = tr
 hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+
+
+-- ──  Clipboard ────────────────────────────────────────────────────────────
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd('noctalia msg clipboard-clear && notify-send "Clipboard Cleared!"'))
+
+-- Screenlock using noctalia
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd('noctalia msg session lock'))
+hl.bind(mainMod .. " + O", hl.dsp.exec_cmd('noctalia msg panel-toggle launcher'))
