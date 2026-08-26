@@ -29,20 +29,21 @@ set -euo pipefail
 # ----------------------------- CONFIG --------------------------------------
 
 API_KEY="${API_KEY:-$wallhaven}"           # your wallhaven API key (optional, needed for NSFW/account settings)
-QUERY="${QUERY:-}"                         # search query, e.g. "nature", "-people", "@username"
+QUERY="${QUERY:-hot}"                         # search query, e.g. "nature", "-people", "@username"
 CATEGORIES="${CATEGORIES:-100}"            # general/anime/people bitmask
-PURITY="${PURITY:-110}"                    # sfw/sketchy/nsfw bitmask (nsfw needs API key)
+PURITY="${PURITY:-111}"                    # sfw/sketchy/nsfw bitmask (nsfw needs API key)
 SORTING="${SORTING:-date_added}"           # date_added, relevance, random, views, favorites, toplist
 ORDER="${ORDER:-desc}"                     # desc, asc
 TOPRANGE="${TOPRANGE:-1d}"                 # only used when SORTING=toplist: 1d,3d,1w,1M,3M,6M,1y
-ATLEAST="${ATLEAST:-}"                     # minimum resolution, e.g. "1920x1080"
+ATLEAST="${ATLEAST:-1920x1080}"                     # minimum resolution, e.g. "1920x1080"
 RESOLUTIONS="${RESOLUTIONS:-2560x1440}"    # exact resolutions, e.g. "1920x1080,2560x1440"
-RATIOS="${RATIOS:-}"                       # aspect ratios, e.g. "16x9,16x10"
-LIMIT="${LIMIT:-20}"                       # max wallpapers to keep in OUTDIR at once
-MAX_SEARCH_PAGES="${MAX_SEARCH_PAGES:-20}" # safety cap on result pages to page through while refilling the pool
+RATIOS="${RATIOS:-16x9}"                       # aspect ratos, e.g. "16x9,16x10"
+LIMIT="${LIMIT:-30}"                       # max wallpapers to keep in OUTDIR at once
+MAX_SEARCH_PAGES="${MAX_SEARCH_PAGES:-30}" # safety cap on result pages to page through while refilling the pool
 OUTDIR="${OUTDIR:-$HOME/Pictures/Wallpapers/wallhaven}"   # where to save downloaded images (tilde-safe: uses $HOME)
 HISTORY_FILE="${HISTORY_FILE:-$OUTDIR/.history}"          # permanent record of every ID ever downloaded (never pruned)
 WHITELIST_FILE="${WHITELIST_FILE:-$OUTDIR/.whitelist}"    # one wallpaper ID per line; pinned, survives rotation, auto-restored
+BLACKLIST_FILE="${BLACKLIST_FILE:-$OUTDIR/.blacklist}"    # one wallpaper ID per line; never downloaded, deleted on sight
 RATE_LIMIT_SLEEP="${RATE_LIMIT_SLEEP:-1.4}"               # seconds to sleep between API calls (45/min limit -> ~1.33s min)
 
 # ---------------------------- ARG PARSING -----------------------------------
@@ -69,6 +70,14 @@ Whitelisting:
   Add a wallpaper ID (one per line) to the whitelist file to pin it — it will
   never be cleared during rotation, and will be re-downloaded automatically
   if its file goes missing. Whitelist file: \$OUTDIR/.whitelist (default)
+
+Blacklisting:
+  Add a wallpaper ID (one per line) to the blacklist file and it will never
+  be downloaded again, and gets deleted on sight if already present.
+  Blacklist file: \$OUTDIR/.blacklist (default)
+  Note: this is per-ID and local only. Wallhaven's own account-level
+  blacklist (tag_blacklist / user_blacklist, set on wallhaven.cc) is by tag
+  or uploader, not by individual wallpaper — pass -k to apply it automatically.
 
 Examples:
   $0                              # latest SFW wallpapers, keep pool of $LIMIT
@@ -97,10 +106,11 @@ while getopts "q:c:u:s:o:t:r:R:a:L:d:k:h" opt; do
   esac
 done
 
-# If OUTDIR was overridden via -d after HISTORY_FILE/WHITELIST_FILE were computed
-# from the old default, keep them consistent unless the user explicitly set those too.
+# If OUTDIR was overridden via -d after HISTORY_FILE/WHITELIST_FILE/BLACKLIST_FILE
+# were computed from the old default, keep them consistent unless explicitly set.
 HISTORY_FILE="${HISTORY_FILE:-$OUTDIR/.history}"
 WHITELIST_FILE="${WHITELIST_FILE:-$OUTDIR/.whitelist}"
+BLACKLIST_FILE="${BLACKLIST_FILE:-$OUTDIR/.blacklist}"
 
 # ---------------------------- DEPENDENCY CHECK ------------------------------
 
@@ -109,7 +119,7 @@ for bin in curl jq; do
 done
 
 mkdir -p "$OUTDIR"
-touch "$HISTORY_FILE" "$WHITELIST_FILE"
+touch "$HISTORY_FILE" "$WHITELIST_FILE" "$BLACKLIST_FILE"
 
 # ---------------------------- HELPERS ---------------------------------------
 
@@ -153,6 +163,24 @@ while IFS= read -r wid; do
   fi
 done < "$WHITELIST_FILE"
 
+# ---------------------------- STEP 1b: PURGE BLACKLIST -----------------------
+
+echo "== Purging blacklisted wallpapers =="
+purged=0
+while IFS= read -r bid; do
+  [[ -z "$bid" ]] && continue
+  if grep -qxF "$bid" "$WHITELIST_FILE" 2>/dev/null; then
+    echo "  [warn] $bid is in BOTH whitelist and blacklist — blacklist wins, removing." >&2
+  fi
+  for f in "${OUTDIR}/${bid}".*; do
+    [[ -f "$f" ]] || continue
+    rm -f "$f"
+    purged=$((purged + 1))
+    echo "  [purge] removed $bid"
+  done
+done < "$BLACKLIST_FILE"
+echo "  purged $purged file(s)"
+
 # ---------------------------- STEP 2: CLEAR NON-WHITELISTED ------------------
 
 echo "== Rotating pool: clearing non-whitelisted wallpapers =="
@@ -160,7 +188,7 @@ cleared=0
 for f in "$OUTDIR"/*; do
   [[ -f "$f" ]] || continue
   case "$f" in
-    "$HISTORY_FILE"|"$WHITELIST_FILE") continue ;;
+    "$HISTORY_FILE"|"$WHITELIST_FILE"|"$BLACKLIST_FILE") continue ;;
   esac
   fid="$(id_of_file "$f")"
   if ! grep -qxF "$fid" "$WHITELIST_FILE" 2>/dev/null; then
@@ -170,7 +198,11 @@ for f in "$OUTDIR"/*; do
 done
 echo "  cleared $cleared file(s)"
 
-whitelisted_present=$(find "$OUTDIR" -maxdepth 1 -type f ! -name "$(basename "$HISTORY_FILE")" ! -name "$(basename "$WHITELIST_FILE")" | wc -l | tr -d ' ')
+whitelisted_present=$(find "$OUTDIR" -maxdepth 1 -type f \
+  ! -name "$(basename "$HISTORY_FILE")" \
+  ! -name "$(basename "$WHITELIST_FILE")" \
+  ! -name "$(basename "$BLACKLIST_FILE")" \
+  | wc -l | tr -d ' ')
 slots_needed=$((LIMIT - whitelisted_present))
 if (( slots_needed <= 0 )); then
   echo "Whitelist alone already fills or exceeds LIMIT ($LIMIT). Nothing new to fetch."
@@ -215,8 +247,8 @@ while (( downloaded < slots_needed )) && (( page <= MAX_SEARCH_PAGES )); do
   while IFS=$'\t' read -r id path; do
     (( downloaded >= slots_needed )) && break
 
-    # skip anything already downloaded before, or pinned (already present)
-    if grep -qxF "$id" "$HISTORY_FILE" 2>/dev/null || grep -qxF "$id" "$WHITELIST_FILE" 2>/dev/null; then
+    # skip anything already downloaded before, pinned, or blacklisted
+    if grep -qxF "$id" "$HISTORY_FILE" 2>/dev/null || grep -qxF "$id" "$WHITELIST_FILE" 2>/dev/null || grep -qxF "$id" "$BLACKLIST_FILE" 2>/dev/null; then
       continue
     fi
 
