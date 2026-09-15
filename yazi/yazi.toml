@@ -1,0 +1,60 @@
+[mgr]
+ratio          = [ 1, 2, 4 ] # Parent, current, preview column width ratios
+sort_by        = "alphabetical"
+sort_sensitive = false
+sort_dir_first = true
+show_hidden    = true
+show_symlink   = true
+
+[preview]
+tab_size   = 2
+max_width  = 1000
+max_height = 1000
+
+[opener]
+# Zathura for PDFs
+zathura = [
+    { run = 'zathura %s', orphan = true, desc = "Zathura", for = "unix" },
+]
+
+# Mdview for viewing MD files.
+mdview = [
+    { run = 'BROWSER="zen-browser --private-window" mdview %s && notify-send "Opened in Zen"', orphan = true, desc = "MD View (Zen)", for = "unix" },
+]
+
+# Terminal Editor (e.g., Neovim/Vim)
+edit = [
+    { run = '${EDITOR:-nvim} %s', block = true, desc = "Edit", for = "unix" },
+]
+
+# # Media Player (e.g., MPV)
+# play = [
+#     { run = 'mpv %s', orphan = true, desc = "Play", for = "unix" },
+# ]
+
+[open]
+rules = [
+    # Match PDFs specifically by extension or MIME type
+    { url = "*.pdf", use = [ "zathura", "open" ] },
+
+    { url = "*.md", use = [ "mdview", "open" ] },
+
+    # Match text and video files
+    { mime = "text/*", use = [ "edit", "open" ] },
+    { mime = "video/*", use = [ "play", "open" ] },
+
+    # Fallback for folder opening / unmatched files
+    { url = "*/", use = [ "edit", "open" ] },
+]
+
+# Git status plugin (yazi-rs/plugins:git)
+# https://github.com/yazi-rs/plugins/tree/main/git.yazi
+[[plugin.prepend_fetchers]]
+url = "*"
+run = "git"
+group = "git"
+
+[[plugin.prepend_fetchers]]
+url = "*/"
+run = "git"
+group = "git"
