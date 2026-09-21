@@ -12,17 +12,28 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --type text  --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
-    -- Noctalia
-    hl.exec_cmd("noctalia")
-
     -- Udiskie
     hl.exec_cmd("udiskie")
 
-    -- Custom Script
-    hl.exec_cmd("~/.local/bin/battery-notify.sh")
+    -- Dark Mode
+    hl.exec_cmd('gsettings set org.gnome.desktop.interface gtk-theme "YOUR_DARK_GTK3_THEME"')
+    hl.exec_cmd('gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"')
+
+    hl.exec_cmd('dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP')
+
+    -- Hyprsunset (started as a service, hence commented out.)
+    -- systemctl --user enable --now hyprsunset.service
+    hl.exec_cmd('hyprsunset')
+
+    hl.exec_cmd('waybar')
+    -- Hyprlock
+    hl.exec_cmd('hyprlock')
+    --
+    hl.on("hyprland.start", function()
+        hl.exec_cmd("wl-paste --type text --watch cliphist store")
+        hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    end)
 
 
-    -- -- lockscreen.
-    -- hl.exec_cmd("sleep 4 && noctalia msg session lock")
+
 end)
-

@@ -4,10 +4,10 @@
 
 hl.config({
     input = {
-        kb_layout  = "us,ara",
+        kb_layout  = "us",
         kb_variant = "",
         kb_model   = "",
-        kb_options = "grp:alt_shift_toggle",
+        kb_options = "",
         kb_rules   = "",
 
         follow_mouse = 1,

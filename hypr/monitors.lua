@@ -2,10 +2,18 @@
 ---- MONITORS ----
 ------------------
 
--- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+-- Primary Laptop Display
 hl.monitor({
-	output	= "",
-	mode	= "preferred",
-	position = "auto",
-	scale	= "auto",
+    output   = "eDP-1",
+    mode     = "preferred",
+    position = "0x0",
+    scale    = 1,
+})
+
+-- Fallback for external/unspecified monitors
+hl.monitor({
+    output   = "",
+    mode     = "preferred",
+    position = "auto",
+    scale    = "auto",
 })

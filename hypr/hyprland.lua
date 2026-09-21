@@ -80,6 +80,14 @@ require("input")
 require("keybindings")
 
 
+
+---------------------
+---- WALLPAPERS ----
+---------------------
+
+require("hyprpaper")
+
+
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
@@ -120,5 +128,3 @@ hl.window_rule({
     float = true,
 })
 
--- For Noctalia Color templates
-require("noctalia")

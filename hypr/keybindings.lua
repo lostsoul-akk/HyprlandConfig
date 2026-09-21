@@ -11,10 +11,8 @@ local mainMod  = "SUPER" -- Sets "Windows" key as main modifier
 -- ── System ────────────────────────────────────────────────────────────────────
 
 hl.bind(mainMod .. " + Q",         hl.dsp.window.close())
-
-
--- Wouldn't wanna press this accidentally.
---- hl.bind(mainMod .. " + N",         hl.dsp.exit())
+-- NOTE: Commenting this out as it'll probably mess me up, especially with a new keyboard and all.
+-- hl.bind(mainMod .. " + N",         hl.dsp.exit())
 -- With the use of Noctalia, there's no need to have a custom waybar, hence no need for a script to restart it.
 -- Free Keybind: mainMod .. " + SHIFT + B"
 
@@ -25,7 +23,15 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(programs.browser))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(programs.codeEditor))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(programs.music))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(programs.terminal .. " " .. programs.fileManager))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(programs.menu))
+-- App launcher using rofi.
+-- NOTE: NOTE: Figure out toggling by pressing the same keys.
+hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(programs.launcher))
+
+hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd(programs.lock))
+
+-- Clipboard history (cliphist + rofi): text and images.
+-- Needs the wl-paste watchers from the autostart section to be running.
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/rofi/cliphist.sh"))
 
 
 -- ── Screenshots ───────────────────────────────────────────────────────────────
@@ -42,14 +48,16 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(programs.menu))
 -- sudo pacman -S grim slurp satty wl-clipboard
 -- Install satty: https://github.com/gabm/satty
 
--- TODO: Notice that this is for screenshots, using grim and slurp.
--- Below  we're using Noctalia's inbuilt. Remember to switch out when you aren't using Noctalia later on in life.
---
--- Start an interactive region screenshot
-hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("noctalia msg screenshot-region"))
+-- Screenshots
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(
+    [[sh -c 'DIR=~/Pictures/screenshots && mkdir -p "$DIR" && FILE="$DIR/screenshot_$(date +%Y%m%d_%H%M%S).png" && grim -g "$(slurp)" "$FILE" && wl-copy < "$FILE" && satty --filename "$FILE" --copy-command "wl-copy"']]
+))
 
--- Capture the focused monitor by default, pick interactively with pick, or all outputs with all
-hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("noctalia msg screenshot-fullscreen"))
+hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd(
+    [[sh -c 'grim -g "$(slurp)" /tmp/ocr.png && tesseract /tmp/ocr.png /tmp/ocr && wl-copy < /tmp/ocr.txt && notify-send "OCR Screenshot" "Text extracted to clipboard" && rm /tmp/ocr.png /tmp/ocr.txt']]
+))
+
+
 -- hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(
 --     [[sh -c 'FILE=$(mktemp /tmp/screenshot-XXXXXX.png) && grim -g "$(slurp)" "$FILE" && wl-copy < "$FILE" && satty --filename "$FILE" --copy-command "wl-copy"']]
 -- ))
@@ -125,7 +133,7 @@ hl.bind(mainMod .. " + SHIFT + l", hl.dsp.window.move({ workspace = "e+1" }))
 hl.bind(mainMod .. " + SHIFT + h",  hl.dsp.window.move({ workspace = "e-1" }))
 
 -- Scratchpad (special workspace)
--- NOTE: moved from SHIFT+S → CTRL+S to free up SHIFT+S for magic windows
+-- NOTE: moved from SHIFT+S → CTRL+S to free up SHIFT+S for screenshots
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + SHIFT + S",  hl.dsp.window.move({ workspace = "special:magic" }))
 
@@ -153,9 +161,5 @@ hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 
 
--- ──  Clipboard ────────────────────────────────────────────────────────────
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd('noctalia msg clipboard-clear && notify-send "Clipboard Cleared!"'))
-
--- Screenlock using noctalia
-hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd('noctalia msg session lock'))
-hl.bind(mainMod .. " + O", hl.dsp.exec_cmd('noctalia msg panel-toggle launcher'))
+local programs = require("programs")
+hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(programs.changeWallpaper))
