@@ -27,7 +27,10 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(programs.terminal .. " " .. programs.
 -- NOTE: NOTE: Figure out toggling by pressing the same keys.
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(programs.launcher))
 
-hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd(programs.lock))
+
+-- Lock screen (starts hyprlock plus the music-disc animation)
+hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/lock.sh"))
+-- hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd(programs.lock))
 
 -- Clipboard history (cliphist + rofi): text and images.
 -- Needs the wl-paste watchers from the autostart section to be running.

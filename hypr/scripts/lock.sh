@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Lock the screen with hyprlock (does nothing if it is already locked).
-# hyprlock.conf is a normal config now, so plain `hyprlock` works too; this is just the
-# entry point for keybinds / hypridle. It renders the disc once first so the file that
-# hyprlock.conf uses as its first image already exists.
+# Optional: plain `hyprlock` works just as well. The music disc is started by hyprlock.conf
+# itself, so it turns however you lock.
 
 pgrep -x hyprlock >/dev/null && exit 0
 
-"$(dirname "${BASH_SOURCE[0]}")/lock-disc.sh" >/dev/null 2>&1
+# placeholder image hyprlock.conf starts with (lock-disc-daemon.sh creates it if missing)
+"$(dirname "${BASH_SOURCE[0]}")/lock-disc-daemon.sh" --prepare
 
 exec hyprlock "$@"
