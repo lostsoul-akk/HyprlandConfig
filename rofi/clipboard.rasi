@@ -1,0 +1,33 @@
+/* ~/.config/rofi/clipboard.rasi */
+@import "config.rasi"
+
+/* dmenu mode has no modes to switch, so drop the dock */
+mode-switcher {
+  enabled: false;
+}
+
+window {
+  width: 670px;
+}
+
+listview {
+  columns: 1;
+  lines: 6;
+  cycle: false;
+  dynamic: true;
+}
+
+element {
+  orientation: horizontal;
+  padding: 12px;
+}
+
+/* big enough to recognise screenshots */
+element-icon {
+  size: 48px;
+}
+
+element-text {
+  vertical-align: 0.5;
+  horizontal-align: 0.0;
+}
