@@ -1,0 +1,52 @@
+/* ~/.config/rofi/wallpaper.rasi
+ * Wallpaper picker with image previews. Used by scripts/wallpaper.sh pick (SUPER+SHIFT+W). */
+@import "config.rasi"
+
+/* dmenu mode has no modes to switch, so drop the dock */
+mode-switcher {
+    enabled: false;
+}
+
+window {
+    width: 900px;
+}
+
+listview {
+    columns:       3;
+    lines:         3;
+    spacing:       12px;
+    fixed-columns: true;
+    fixed-height:  true;
+    dynamic:       true;
+    cycle:         false;
+}
+
+element {
+    orientation:   vertical;
+    padding:       10px;
+    spacing:       8px;
+    border-radius: 16px;
+}
+
+/* States spelled out fully so rofi's built-in light theme can't show through */
+element normal.normal, element alternate.normal {
+    background-color: transparent;
+    text-color:       @secondary-fixed-dim;
+}
+
+element selected.normal {
+    background-color: @primary;
+    text-color:       #000000;
+}
+
+/* thumbnails are 16:9, so they show whole instead of cropped */
+element-icon {
+    size:             240px;
+    horizontal-align: 0.5;
+}
+
+element-text {
+    font:             "JetBrainsMono Nerd Font 9";
+    horizontal-align: 0.5;
+    vertical-align:   0.5;
+}
