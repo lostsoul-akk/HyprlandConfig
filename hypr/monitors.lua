@@ -48,7 +48,7 @@ local function lid_is_closed()
     return s:find("closed") ~= nil
 end
 
-local internal_on = nil  -- last state we applied (nil = unknown)
+local internal_on = true  -- last state we applied (nil = unknown)
 
 local function set_internal(enabled)
     if internal_on == enabled then return end   -- guard against event loops
