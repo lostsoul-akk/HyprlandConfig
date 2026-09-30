@@ -1,78 +1,139 @@
 #!/usr/bin/env bash
-# Wallpaper cycler for hyprpaper.
-# The active wallpaper is a soft link ($LINK) pointing at the real image, so
-# hyprpaper.conf, lock.sh and anything else can just use $LINK.
+# Wallpaper manager for hyprpaper.
 #
-#   wallpaper.sh init         make sure the link exists (default wallpaper) and apply it
-#   wallpaper.sh next | prev  cycle through the wallpapers folder
+# The active wallpaper is a soft link ($LINK) that always points at the real image.
+# hyprpaper.conf and the lockscreen both just use $LINK.
+#
+#   wallpaper.sh start        boot: reset to the FIRST wallpaper, start hyprpaper,
+#                             then switch to the next one every $INTERVAL seconds
+#   wallpaper.sh next | prev  step through the folder (resets the timer)
 #   wallpaper.sh random       jump to a random one
+#   wallpaper.sh first        jump back to the first one
 #   wallpaper.sh set <file>   use a specific image
+#   wallpaper.sh pick         choose one from a rofi menu
 
-WALL_DIR="${WALL_DIR:-$HOME/Pictures/Wallpapers/wallhaven}"
+# ── Settings ─────────────────────────────────────────────────────────────────
+WALL_DIR="${WALL_DIR:-$HOME/Pictures/Wallpapers/wallhaven}"     # scanned recursively
 LINK="${WALLPAPER_LINK:-$HOME/Pictures/Wallpapers/current}"
-DEFAULT="${WALLPAPER_DEFAULT:-$HOME/Pictures/Wallpapers/wallhaven/6lyj1q.png}"   # same default as hyprpaper.lua
+INTERVAL="${WALLPAPER_INTERVAL:-600}"                            # seconds (10 min)
 FIT="${WALLPAPER_FIT:-cover}"
+PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/wallpaper-daemon.pid"
 
-# Re-scan every time, so new files in the folder are picked up automatically
-mapfile -t walls < <(find -L "$WALL_DIR" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) 2>/dev/null | sort)
-n=${#walls[@]}
-if [ "$n" -eq 0 ]; then
-    echo "No wallpapers found in $WALL_DIR" >&2
-    exit 1
-fi
+# ── Helpers ──────────────────────────────────────────────────────────────────
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send -t 1500 "Wallpaper" "$1"; }
 
-current="$(readlink -f "$LINK" 2>/dev/null)"
-idx=-1
-for i in "${!walls[@]}"; do
-    if [ "$(readlink -f "${walls[$i]}")" = "$current" ]; then idx=$i; break; fi
-done
+# Re-scan every time so new files in the folder are picked up automatically.
+scan() {
+    mapfile -t walls < <(find -L "$WALL_DIR" -type f \
+        \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) 2>/dev/null | sort)
+    n=${#walls[@]}
+    if [ "$n" -eq 0 ]; then
+        echo "No wallpapers found in $WALL_DIR" >&2
+        notify "No wallpapers found in $WALL_DIR"
+        exit 1
+    fi
+}
 
+# Position of the current wallpaper in the array (-1 if the link is missing/broken).
+current_index() {
+    idx=-1
+    local cur i
+    cur="$(readlink -f "$LINK" 2>/dev/null)"
+    [ -n "$cur" ] || return 0
+    for i in "${!walls[@]}"; do
+        if [ "$(readlink -f "${walls[$i]}")" = "$cur" ]; then idx=$i; break; fi
+    done
+}
+
+# Point the link at $1 and show it. hyprpaper is sent the real path (not the link),
+# so it always sees a new path and reloads. If hyprpaper isn't running yet, start it:
+# it reads hyprpaper.conf, which points at the link we just updated.
+apply() {
+    local target
+    target="$(readlink -f "$1")"
+    [ -f "$target" ] || { echo "Not a file: $1" >&2; exit 1; }
+
+    mkdir -p "$(dirname "$LINK")"
+    ln -sfn "$target" "$LINK"
+
+    if pgrep -x hyprpaper >/dev/null 2>&1; then
+        hyprctl hyprpaper wallpaper ",$target,$FIT" >/dev/null
+    else
+        setsid -f hyprpaper >/dev/null 2>&1
+    fi
+    [ "$2" = "notify" ] && notify "$(basename "$target")"
+}
+
+step() {   # step <next|prev|random|first> [notify]
+    scan
+    current_index
+    local t
+    case "$1" in
+        next)   t="${walls[$(( (idx + 1) % n ))]}" ;;                # idx=-1 -> first
+        prev)   [ "$idx" -lt 0 ] && idx=0
+                t="${walls[$(( (idx - 1 + n) % n ))]}" ;;
+        first)  t="${walls[0]}" ;;
+        random) t="${walls[$(( RANDOM % n ))]}"
+                if [ "$n" -gt 1 ] && [ "$idx" -ge 0 ]; then
+                    while [ "$(readlink -f "$t")" = "$(readlink -f "${walls[$idx]}")" ]; do
+                        t="${walls[$(( RANDOM % n ))]}"
+                    done
+                fi ;;
+    esac
+    apply "$t" "$2"
+}
+
+# Restart the auto-switch timer after a manual change.
+nudge() {
+    local pid
+    [ -f "$PIDFILE" ] && pid="$(cat "$PIDFILE" 2>/dev/null)"
+    [ -n "$pid" ] && kill -USR1 "$pid" 2>/dev/null
+    return 0
+}
+
+daemon() {
+    # Only one daemon at a time
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE" 2>/dev/null)" 2>/dev/null; then
+        exit 0
+    fi
+    echo $$ > "$PIDFILE"
+    trap 'rm -f "$PIDFILE"' EXIT
+    trap ':' USR1                       # manual change: just wake up and restart the timer
+
+    step first ""                       # every boot starts at the first wallpaper
+
+    local sleeper
+    while :; do
+        sleep "$INTERVAL" & sleeper=$!
+        if wait "$sleeper"; then        # slept the full interval -> advance
+            step next ""
+        fi                              # interrupted by USR1 -> the change already happened
+        kill "$sleeper" 2>/dev/null
+    done
+}
+
+# ── Commands ─────────────────────────────────────────────────────────────────
 case "${1:-next}" in
-    init)
-        if [ -f "$current" ]; then
-            target="$current"                       # link is fine, keep it
-        elif [ -n "$DEFAULT" ] && [ -f "$DEFAULT" ]; then
-            target="$(readlink -f "$DEFAULT")"
-        else
-            target="${walls[0]}"                    # first wallpaper in the folder
-        fi
+    start)
+        daemon
         ;;
-    next)
-        target="${walls[$(( (idx + 1) % n ))]}"
-        ;;
-    prev)
-        [ "$idx" -lt 0 ] && idx=0
-        target="${walls[$(( (idx - 1 + n) % n ))]}"
-        ;;
-    random)
-        target="${walls[$(( RANDOM % n ))]}"
-        if [ "$n" -gt 1 ]; then
-            while [ "$(readlink -f "$target")" = "$current" ]; do
-                target="${walls[$(( RANDOM % n ))]}"
-            done
-        fi
+    next|prev|random|first)
+        step "$1" notify
+        nudge
         ;;
     set)
-        target="$(readlink -f "${2:-}" 2>/dev/null)"
-        if [ ! -f "$target" ]; then echo "Not a file: ${2:-}" >&2; exit 1; fi
+        apply "${2:-}" notify
+        nudge
+        ;;
+    pick)
+        scan
+        choice="$(printf '%s\n' "${walls[@]#"$WALL_DIR"/}" | rofi -dmenu -i -p "Wallpaper")"
+        [ -z "$choice" ] && exit 0
+        apply "$WALL_DIR/$choice" notify
+        nudge
         ;;
     *)
-        echo "Usage: ${0##*/} [init|next|prev|random|set <file>]" >&2
+        echo "Usage: ${0##*/} [start|next|prev|random|first|set <file>|pick]" >&2
         exit 1
         ;;
 esac
-
-target="$(readlink -f "$target")"
-mkdir -p "$(dirname "$LINK")"
-ln -sfn "$target" "$LINK"
-
-# Apply. The real path is sent (not the link) so hyprpaper always sees a new path and reloads.
-if pgrep -x hyprpaper >/dev/null 2>&1; then
-    hyprctl hyprpaper wallpaper ",$target,$FIT" >/dev/null
-else
-    hyprpaper >/dev/null 2>&1 &
-    disown
-fi
-
-command -v notify-send >/dev/null 2>&1 && notify-send -t 1500 "Wallpaper" "$(basename "$target")"
-exit 0
