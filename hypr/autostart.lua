@@ -28,6 +28,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd('waybar')
     -- Hyprlock
     hl.exec_cmd('hyprlock')
+
+    hl.exec_cmd('swayosd-server')
     --
     hl.on("hyprland.start", function()
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
