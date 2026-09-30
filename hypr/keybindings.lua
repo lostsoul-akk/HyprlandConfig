@@ -11,10 +11,7 @@ local mainMod  = "SUPER" -- Sets "Windows" key as main modifier
 -- ── System ────────────────────────────────────────────────────────────────────
 
 hl.bind(mainMod .. " + Q",         hl.dsp.window.close())
--- NOTE: Commenting this out as it'll probably mess me up, especially with a new keyboard and all.
--- hl.bind(mainMod .. " + N",         hl.dsp.exit())
--- With the use of Noctalia, there's no need to have a custom waybar, hence no need for a script to restart it.
--- Free Keybind: mainMod .. " + SHIFT + B"
+
 
 -- ── Apps ──────────────────────────────────────────────────────────────────────
 
@@ -23,12 +20,14 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(programs.browser))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(programs.codeEditor))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(programs.music))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(programs.terminal .. " " .. programs.fileManager))
+
 -- App launcher using rofi.
 -- NOTE: NOTE: Figure out toggling by pressing the same keys.
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(programs.launcher))
 
 hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd(programs.lock))
 
+-- TODO: This isn't done. Should be attended to.
 -- Clipboard history (cliphist + rofi): text and images.
 -- Needs the wl-paste watchers from the autostart section to be running.
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/rofi/cliphist.sh"))
@@ -36,8 +35,6 @@ hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/rofi/c
 
 -- ── Screenshots ───────────────────────────────────────────────────────────────
 
--- Windows Snipping Tool equivalent: SUPER + SHIFT + S
---
 -- Flow:
 --   1. slurp   → draw a region on screen
 --   2. grim    → capture that region to a temp file
@@ -57,10 +54,6 @@ hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd(
     [[sh -c 'grim -g "$(slurp)" /tmp/ocr.png && tesseract /tmp/ocr.png /tmp/ocr && wl-copy < /tmp/ocr.txt && notify-send "OCR Screenshot" "Text extracted to clipboard" && rm /tmp/ocr.png /tmp/ocr.txt']]
 ))
 
-
--- hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(
---     [[sh -c 'FILE=$(mktemp /tmp/screenshot-XXXXXX.png) && grim -g "$(slurp)" "$FILE" && wl-copy < "$FILE" && satty --filename "$FILE" --copy-command "wl-copy"']]
--- ))
 
 -- ── Power Profile ──────────────────────────────────────────────────────────
 hl.bind(mainMod .. " + ALT + P", function()
@@ -85,21 +78,16 @@ hl.bind(mainMod .. " + Z", hl.dsp.window.pseudo())       -- dwindle pseudotile t
 
 -- Float + Pin in one shot - useful for PiP or any window you want
 -- to keep floating above everything else across all workspaces.
--- SUPER + P -> make active window float and pin it.
--- SUPER + P again -> upin and return to tiling.
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(
-	"hyprctl --batch 'dispatch togglefloating ; dispatch pin'"
+-- SUPER + SHIFT + D -> make active window float and pin it.
+-- SUPER + SHIFT + D again -> unpin and return to tiling.
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd(
+    "hyprctl --batch 'dispatch togglefloating ; dispatch pin'"
 ))
 
--- Move focus — arrow keys (Commented out: Gotta master vim's key bindings).
--- hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left"  }))
--- hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
--- hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up"    }))
--- hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down"  }))
 
 -- Move focus — vim keys
-hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "left"  }))
-hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "left"  }))
+hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up"    }))
 hl.bind(mainMod .. " + j", hl.dsp.focus({ direction = "down"  }))
 
@@ -118,14 +106,10 @@ end
 hl.bind(mainMod .. " + 0",         hl.dsp.focus({ workspace = 10 }))
 hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
--- Cycle through workspaces (Commented out: Gotta master vim's key bindings).
--- hl.bind(mainMod .. " + CONTROL + right", hl.dsp.focus({ workspace = "e+1" }))
--- hl.bind(mainMod .. " + CONTROL + left",  hl.dsp.focus({ workspace = "e-1" }))
 
 -- Cycle through workspaces - vim keys
 hl.bind(mainMod .. " + CONTROL + l", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind(mainMod .. " + CONTROL + h",  hl.dsp.focus({ workspace = "e-1" }))
-
 
 
 -- Move active window to adjacent workspace (and follow)
@@ -143,7 +127,7 @@ hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 
 
 -- ── Media & hardware keys ─────────────────────────────────────────────────────
--- Ensure you have swayosd installed, and autostart its server
+-- NOTE: Ensure you have swayosd installed, and autostart its server
 -- Volume
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume +5"),    { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("swayosd-client --output-volume -5"),    { locked = true, repeating = true })
@@ -162,5 +146,8 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("swayosd-client --playerctl pause"), {
 -- Find a bind that'll act as a toggle for both play and pause.
 
 
-local programs = require("programs")
-hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(programs.changeWallpaper))
+-- ── Wallpaper ─────────────────────────────────────────────────────────────────
+-- Cycling and the 10-minute auto-switch are handled by scripts/wallpaper.sh
+-- (started from hyprpaper.lua). Manual changes also reset its timer.
+hl.bind(mainMod .. " + D",         hl.dsp.exec_cmd(programs.changeWallpaper))  -- next wallpaper
+hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(programs.pickWallpaper))    -- rofi picker

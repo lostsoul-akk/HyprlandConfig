@@ -18,6 +18,7 @@ M.launcher       = "rofi -show drun"
 M.music          = "spotify-launcher"
 M.codeEditor     = "nvim" -- Get to using neovim
 M.lock      	 = "hyprlock"
-M.changeWallpaper = "~/.config/hypr/scripts/wallpaper-switch.sh"
-
+M.changeWallpaper = os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh next"
+M.pickWallpaper   = os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh pick"
+-- Let's see
 return M

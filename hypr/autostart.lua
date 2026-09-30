@@ -29,7 +29,11 @@ hl.on("hyprland.start", function()
     -- Hyprlock
     hl.exec_cmd('hyprlock')
 
+    -- swayosd server
     hl.exec_cmd('swayosd-server')
+
+    -- Autostart for wallpapers.
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh start")
     --
     hl.on("hyprland.start", function()
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
